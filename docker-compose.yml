@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:v2.4
+    ports:
+      - "80:80" # Router
+      - "8080:8080" # Dashboard
+    volumes:
+      # So that Traefik can listen to the Docker events
+      # This is just for Docker-Compose
+      - /var/run/docker.sock:/var/run/docker.sock
+      
+      # Traefik general config file
+      - ./traefik.yml:/etc/traefik/traefik.yml
+
+      # Rules (they cannot be in traefik.yml)
+      - ./hello.yml:/conf/hello.yml
+
+  whoami:
+    image: traefik/whoami
+    labels:
+      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)" 
+
+  hello:
+    build: .
+    labels:
+      # I tried two ways of routing to this service, but more exist.
+      # 1: use the "file" provider in traefik.yml,
+      #    define the rules in config files (put them in the folder defined in traefik.yml)
+      #    and enable this service to be discovered with the tag below:
+      - "traefik.enable=true"
+
+      # 2: use the "docker" provider in traefik.yml and set the rules directly here as labels
+      - "traefik.http.routers.hello.rule=Host(`hello2.docker.localhost`)"

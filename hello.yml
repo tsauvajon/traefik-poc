@@ -1,0 +1,14 @@
+# In a real use case, we would use a Kubernetes Ingress instead;
+# this is what already happens at the moment, all our routes are going through Traefik
+
+http:
+  services:
+    hello:
+      loadBalancer:
+        servers:
+          - url: http://hello:8080
+
+  routers:
+    Router0:
+      rule: "Path(`/v1/hello`) || Host(`hello.docker.localhost`)"
+      service: hello
