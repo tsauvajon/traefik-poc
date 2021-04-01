@@ -7,8 +7,27 @@ http:
       loadBalancer:
         servers:
           - url: http://hello:8080
+    google:
+      loadBalancer:
+        servers:
+          - url: https://www.google.com
 
   routers:
-    Router0:
+    HelloRouter:
       rule: "Path(`/v1/hello`) || Host(`hello.docker.localhost`)"
       service: hello
+      middlewares:
+        - RateLimiter
+    GoogleRouter:
+      rule: "Path(`/google`)"
+      service: google
+
+  middlewares:
+    RateLimiter:
+      rateLimit:
+        period: 1m
+        average: 2 # maximum in requests per period (default 1 sec)
+        burst: 4 # max number of requests that can happen at the same time https://doc.traefik.io/traefik/middlewares/ratelimit/#burst
+      # possibility to make groups
+
+
